@@ -1,0 +1,9 @@
+name: SoloSlumber
+main: com.allocinit.soloslumber.SoloSlumber
+version: 1.0
+description: One player sleep plugin
+api-version: 1.13
+
+commands:
+  soloslumber:
+    description: SoloSlumber command
