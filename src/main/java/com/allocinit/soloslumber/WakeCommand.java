@@ -1,10 +1,13 @@
 package com.allocinit.soloslumber;
 
+import com.allocinit.bukkit.SubCommand;
+import com.allocinit.bukkit.UsageException;
+
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class WakeCommand extends SubCommand {
+public class WakeCommand extends SubCommand<SoloSlumber> {
     public WakeCommand(SoloSlumber plugin) {
         super(plugin, "wake");
     }
@@ -16,8 +19,8 @@ public class WakeCommand extends SubCommand {
         if (args.length != 0)
             throw new UsageException();
 
-        for (String playerName : this.soloSlumber.getSleepers().keySet()) {
-            Player player = this.soloSlumber.getServer().getPlayer(playerName);
+        for (String playerName : this.plugin.getSleepers().keySet()) {
+            Player player = this.plugin.getServer().getPlayer(playerName);
             if (player != null) {
                 player.wakeup(true);
                 player.sendMessage("" + ChatColor.AQUA + sender.getName() + " woke you up!");

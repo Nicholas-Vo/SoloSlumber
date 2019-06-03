@@ -7,3 +7,10 @@ napTime: 100
 # listed here.
 worlds:
   - world
+
+messages:
+  sleep_warning: '§b%player_name% is sleeping.'
+  woken_up: '§b%player_name% woke you up!'
+  night_skipped: '§bNight was skipped!'
+  click_here: '  §9Click here to wake up the sleeper(s)'
+  wake_them_up: 'Wake them up'
