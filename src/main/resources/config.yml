@@ -14,3 +14,4 @@ messages:
   night_skipped: '§bNight was skipped!'
   click_here: '  §9Click here to wake up the sleeper(s)'
   wake_them_up: 'Wake them up'
+  woke_them_up: '§bYou just woke up the sleeper(s)'

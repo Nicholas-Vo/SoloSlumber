@@ -14,18 +14,22 @@ public class WakeCommand extends SubCommand<SoloSlumber> {
 
     @Override
     public void doCommand(CommandSender sender, String[] args) throws Exception {
-        checkPerm(sender, "soloslumber.reload");
-        
         if (args.length != 0)
             throw new UsageException();
+
+        boolean didWake = false;
 
         for (String playerName : this.plugin.getSleepers().keySet()) {
             Player player = this.plugin.getServer().getPlayer(playerName);
             if (player != null) {
                 player.wakeup(true);
-                player.sendMessage("" + ChatColor.AQUA + sender.getName() + " woke you up!");
+                player.sendMessage(this.plugin.getMessage(sender, "woken_up"));
+                didWake = true;
             }
         }
+
+        if (didWake)
+            sender.sendMessage(this.plugin.getMessage(null, "woke_them_up"));
     }
 
     @Override

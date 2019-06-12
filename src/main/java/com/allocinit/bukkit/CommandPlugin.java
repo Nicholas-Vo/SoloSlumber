@@ -12,6 +12,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -58,24 +59,8 @@ public class CommandPlugin extends JavaPlugin implements CommandExecutor {
 
       // If the new config has keys that the old config doesn't have, we'll kick off
       // the migration progress
-      boolean needsMigration = new BooleanSupplier() {
-         @Override
-         public boolean getAsBoolean() {
-            for (String aKey : newConfig.getKeys(false)) {
-               Object val = oldConfig.get(aKey);
-               if (val == null)
-                  return true;
-            }
-            return false;
-         }
-      }.getAsBoolean();
-
-      if (needsMigration) {
-         for (String aKey : oldConfig.getKeys(false)) {
-            Object val = oldConfig.get(aKey);
-            newConfig.set(aKey, val);
-         }
-
+      if (needsMigration(newConfig.getRoot(), oldConfig.getRoot())) {
+         migrateSection(oldConfig.getRoot(), oldConfig.getRoot());
          configFile.renameTo(new File(dataFolder, "config.yml.prev"));
          try {
             newConfig.save(configFile);
@@ -83,6 +68,32 @@ public class CommandPlugin extends JavaPlugin implements CommandExecutor {
             e.printStackTrace();
          }
       }
+   }
+
+   private void migrateSection(ConfigurationSection newConfig, ConfigurationSection oldConfig) {
+      for (String aKey : oldConfig.getKeys(false)) {
+         Object val = oldConfig.get(aKey);
+         if (val instanceof ConfigurationSection) {
+            ConfigurationSection newSubConfig = newConfig.getConfigurationSection(aKey);
+            migrateSection(newSubConfig, (ConfigurationSection) val);
+         } else {
+            newConfig.set(aKey, val);
+         }
+      }
+   }
+
+   private boolean needsMigration(ConfigurationSection newConfig, ConfigurationSection oldConfig) {
+      for (String aKey : newConfig.getKeys(false)) {
+         Object val = oldConfig.get(aKey);
+         if (val == null)
+            return true;
+         if (val instanceof ConfigurationSection) {
+            ConfigurationSection newSubConfig = newConfig.getConfigurationSection(aKey);
+            if (needsMigration(newSubConfig, (ConfigurationSection) val))
+               return true;
+         }
+      }
+      return false;
    }
 
    protected void registerSubCommand(SubCommand<?> cmd) {

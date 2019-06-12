@@ -13,6 +13,8 @@ public class ReloadCommand extends SubCommand<SoloSlumber> {
 
     @Override
     public void doCommand(CommandSender sender, String[] args) throws Exception {
+        checkPerm(sender, "soloslumber.reload");
+
         if (args.length != 0)
             throw new UsageException();
 

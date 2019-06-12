@@ -6,6 +6,7 @@ import java.util.Map;
 import com.allocinit.bukkit.CommandPlugin;
 
 import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.scheduler.BukkitTask;
 
 public class SoloSlumber extends CommandPlugin implements CommandExecutor {
@@ -27,5 +28,14 @@ public class SoloSlumber extends CommandPlugin implements CommandExecutor {
 
    public Map<String, BukkitTask> getSleepers() {
       return sleeperVsTask;
+   }
+
+   public String getMessage(CommandSender sender, String msgKey) {
+      String msg = this.getConfig().getString("messages." + msgKey);
+
+      if (sender != null && msg != null)
+         msg = msg.replace("%player_name%", sender.getName());
+
+      return msg;
    }
 }
