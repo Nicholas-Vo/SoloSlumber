@@ -39,13 +39,18 @@ public class BedListener implements Listener {
             return;
         }
 
+        if (this.soloSlumber.getConfig().getBoolean("wakerForcesNight")) {
+            NightForcer nightForcer = this.soloSlumber.getNightForcers().get(world.getUID());
+            if (nightForcer != null && world.getFullTime() < nightForcer.nextAllowedWake) {
+                player.sendMessage(this.soloSlumber.getMessage(nightForcer.waker, "skip_night_vetoed"));
+                return;
+            }
+        }
+
         boolean foundOtherPlayers = false;
 
         for (Player otherPlayer : world.getPlayers()) {
             if (otherPlayer == player)
-                continue;
-
-            if (otherPlayer.getWorld() != world)
                 continue;
 
             foundOtherPlayers = true;

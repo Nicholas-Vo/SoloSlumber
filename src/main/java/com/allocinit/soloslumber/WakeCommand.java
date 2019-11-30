@@ -1,5 +1,11 @@
 package com.allocinit.soloslumber;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
 import com.allocinit.bukkit.SubCommand;
 import com.allocinit.bukkit.UsageException;
 
@@ -14,22 +20,39 @@ public class WakeCommand extends SubCommand<SoloSlumber> {
 
     @Override
     public void doCommand(CommandSender sender, String[] args) throws Exception {
+        if (!(sender instanceof Player)) {
+            sender.sendMessage("This command can only be run by a player");
+            return;
+        }
+
+        Player waker = (Player) sender;
+
         if (args.length != 0)
             throw new UsageException();
 
-        boolean didWake = false;
+        Set<Player> wakers = new HashSet<>();
 
         for (String playerName : this.plugin.getSleepers().keySet()) {
             Player player = this.plugin.getServer().getPlayer(playerName);
-            if (player != null) {
+            if (player != null && player.getWorld() == waker.getWorld()) {
                 player.wakeup(true);
                 player.sendMessage(this.plugin.getMessage(sender, "woken_up"));
-                didWake = true;
+                wakers.add(player);
             }
         }
 
-        if (didWake)
+        if (!wakers.isEmpty()) {
             sender.sendMessage(this.plugin.getMessage(null, "woke_them_up"));
+
+            // Tell everyone else what happened
+            for (Player otherPlayer : waker.getWorld().getPlayers()) {
+                if (otherPlayer != waker && !wakers.contains(otherPlayer))
+                    otherPlayer.sendMessage(this.plugin.getMessage(waker, "woke_up"));
+            }
+
+            if (this.plugin.getConfig().getBoolean("wakerForcesNight"))
+                this.plugin.getNightForcers().put(waker.getWorld().getUID(), new NightForcer(waker));
+        }
     }
 
     @Override

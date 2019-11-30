@@ -2,6 +2,7 @@ package com.allocinit.soloslumber;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import com.allocinit.bukkit.CommandPlugin;
 
@@ -11,6 +12,7 @@ import org.bukkit.scheduler.BukkitTask;
 
 public class SoloSlumber extends CommandPlugin implements CommandExecutor {
    private Map<String, BukkitTask> sleeperVsTask = new HashMap<>();
+   private Map<UUID, NightForcer> worldVsNightForcer = new HashMap<>();
 
    public SoloSlumber() {
       super("soloslumber");
@@ -28,6 +30,10 @@ public class SoloSlumber extends CommandPlugin implements CommandExecutor {
 
    public Map<String, BukkitTask> getSleepers() {
       return sleeperVsTask;
+   }
+
+   public Map<UUID, NightForcer> getNightForcers() {
+      return this.worldVsNightForcer;
    }
 
    public String getMessage(CommandSender sender, String msgKey) {
