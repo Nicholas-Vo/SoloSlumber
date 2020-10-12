@@ -1,5 +1,9 @@
 package com.allocinit.soloslumber;
 
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -35,14 +39,25 @@ public class BedListener implements Listener {
         final Player player = e.getPlayer();
         final World world = player.getWorld();
 
-        if (!soloSlumber.getConfig().getStringList("worlds").contains(world.getName())) {
+        if (!SoloSlumber.getPlugin().allowedInWorld(player)) {
             return;
         }
 
+        // If the sleeper was previously a waker, remove his veto
+        List<Player> forcers = SoloSlumber.getPlugin().getNightForcers().get(world.getUID());
+        if (forcers != null)
+            forcers.remove(player);
+
+        // Night forced?
         if (this.soloSlumber.getConfig().getBoolean("wakerForcesNight")) {
-            NightForcer nightForcer = this.soloSlumber.getNightForcers().get(world.getUID());
-            if (nightForcer != null && world.getFullTime() < nightForcer.nextAllowedWake) {
-                player.sendMessage(this.soloSlumber.getMessage(nightForcer.waker, "skip_night_vetoed"));
+            Map<UUID, Long> worldVsNextDay = SoloSlumber.getPlugin().getWorldVsNextDay();
+            Long nextDay = worldVsNextDay.get(world.getUID());
+            if (nextDay == null)
+                nextDay = 0L;
+            if (world.getFullTime() < nextDay && forcers != null && !forcers.isEmpty()) {
+                for (Player forcer : forcers) {
+                    player.sendMessage(this.soloSlumber.getMessage(forcer, "skip_night_vetoed"));
+                }
                 return;
             }
         }
@@ -83,17 +98,26 @@ public class BedListener implements Listener {
     public void onBedLeave(final PlayerBedLeaveEvent e) {
         final Player player = e.getPlayer();
 
+        if (!SoloSlumber.getPlugin().allowedInWorld(player)) {
+            return;
+        }
+
         BukkitTask task = this.soloSlumber.getSleepers().remove(player.getName());
         if (task != null) {
             task.cancel();
         }
+
+        if (isNight(player.getWorld()))
+            SoloSlumber.getPlugin().tellEveryoneElse(player, SoloSlumber.getPlugin().getMessage(player, "got_up"));
     }
 
     private void makeDay(World world) {
         if (isNight(world) || world.hasStorm() || world.isThundering()) {
             world.setTime(0L);
-            world.setStorm(false);
-            world.setThundering(false);
+            if (world.hasStorm()) {
+                world.setStorm(false);
+                world.setThundering(false);
+            }
 
             String msg = this.soloSlumber.getMessage(null, "night_skipped");
 

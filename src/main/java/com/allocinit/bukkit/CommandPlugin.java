@@ -6,24 +6,23 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.BooleanSupplier;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class CommandPlugin extends JavaPlugin implements CommandExecutor {
+public class CommandPlugin extends JavaPlugin {
    private String cmdName;
-   private Map<String, SubCommand<?>> commands = new HashMap<>();
+   private Map<String, SubCommand> commands = new HashMap<>();
 
    public CommandPlugin(String cmdName) {
       this.cmdName = cmdName;
    }
 
+   @Override
    public void onEnable() {
       initConfig();
 
@@ -60,10 +59,11 @@ public class CommandPlugin extends JavaPlugin implements CommandExecutor {
       // If the new config has keys that the old config doesn't have, we'll kick off
       // the migration progress
       if (needsMigration(newConfig.getRoot(), oldConfig.getRoot())) {
-         migrateSection(oldConfig.getRoot(), oldConfig.getRoot());
+         migrateSection(newConfig.getRoot(), oldConfig.getRoot());
          configFile.renameTo(new File(dataFolder, "config.yml.prev"));
          try {
             newConfig.save(configFile);
+            System.out.println(newConfig.saveToString());
          } catch (IOException e) {
             e.printStackTrace();
          }
@@ -96,7 +96,7 @@ public class CommandPlugin extends JavaPlugin implements CommandExecutor {
       return false;
    }
 
-   protected void registerSubCommand(SubCommand<?> cmd) {
+   protected void registerSubCommand(SubCommand cmd) {
       commands.put(cmd.getCommandName(), cmd);
    }
 
@@ -106,7 +106,7 @@ public class CommandPlugin extends JavaPlugin implements CommandExecutor {
          if (args.length == 0)
             throw new UsageException();
 
-         SubCommand<?> cmd = commands.get(args[0]);
+         SubCommand cmd = commands.get(args[0]);
 
          if (cmd == null)
             throw new UsageException();
@@ -127,7 +127,7 @@ public class CommandPlugin extends JavaPlugin implements CommandExecutor {
 
    public void writeUsage(CommandSender player) {
       player.sendMessage("[" + ChatColor.GOLD + cmdName + ChatColor.WHITE + " usage]");
-      for (SubCommand<?> cmd : commands.values())
+      for (SubCommand cmd : commands.values())
          cmd.writeUsage(player);
    }
 }

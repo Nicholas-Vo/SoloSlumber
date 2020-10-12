@@ -6,9 +6,9 @@ import com.allocinit.bukkit.UsageException;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
-public class ReloadCommand extends SubCommand<SoloSlumber> {
-    public ReloadCommand(SoloSlumber plugin) {
-        super(plugin, "reload");
+public class ReloadCommand extends SubCommand {
+    public ReloadCommand() {
+        super("reload");
     }
 
     @Override
@@ -18,13 +18,13 @@ public class ReloadCommand extends SubCommand<SoloSlumber> {
         if (args.length != 0)
             throw new UsageException();
 
-        this.plugin.reloadConfig();
+        SoloSlumber.getPlugin().reloadConfig();
 
         sender.sendMessage("" + ChatColor.GREEN + "Configuration reloaded.");
     }
 
     @Override
     public void writeUsage(CommandSender player) {
-        player.sendMessage(ChatColor.GREEN + "/soloslumber reload" + ChatColor.YELLOW + "- Reload the configuration.");
+        player.sendMessage(ChatColor.GREEN + "/soloslumber reload" + ChatColor.YELLOW + " - Reload the configuration.");
     }
 }

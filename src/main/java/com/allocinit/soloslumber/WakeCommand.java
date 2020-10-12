@@ -1,10 +1,7 @@
 package com.allocinit.soloslumber;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 import com.allocinit.bukkit.SubCommand;
 import com.allocinit.bukkit.UsageException;
@@ -13,9 +10,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class WakeCommand extends SubCommand<SoloSlumber> {
-    public WakeCommand(SoloSlumber plugin) {
-        super(plugin, "wake");
+public class WakeCommand extends SubCommand {
+    public WakeCommand() {
+        super("wake");
     }
 
     @Override
@@ -25,39 +22,47 @@ public class WakeCommand extends SubCommand<SoloSlumber> {
             return;
         }
 
-        Player waker = (Player) sender;
-
         if (args.length != 0)
             throw new UsageException();
 
-        Set<Player> wakers = new HashSet<>();
+        Player waker = (Player) sender;
 
-        for (String playerName : this.plugin.getSleepers().keySet()) {
-            Player player = this.plugin.getServer().getPlayer(playerName);
-            if (player != null && player.getWorld() == waker.getWorld()) {
-                player.wakeup(true);
-                player.sendMessage(this.plugin.getMessage(sender, "woken_up"));
-                wakers.add(player);
+        if (!SoloSlumber.getPlugin().allowedInWorld(waker)) {
+            return;
+        }
+
+        doWake(waker);
+    }
+
+    public static void doWake(Player waker) {
+        Set<Player> sleepers = new HashSet<>();
+
+        for (String sleeperName : SoloSlumber.getPlugin().getSleepers().keySet()) {
+            Player sleeper = SoloSlumber.getPlugin().getServer().getPlayer(sleeperName);
+            if (sleeper != null && sleeper.getWorld() == waker.getWorld()) {
+                sleeper.wakeup(true);
+                sleeper.sendMessage(SoloSlumber.getPlugin().getMessage(waker, "woken_up"));
+                sleepers.add(sleeper);
             }
         }
 
-        if (!wakers.isEmpty()) {
-            sender.sendMessage(this.plugin.getMessage(null, "woke_them_up"));
+        if (!sleepers.isEmpty()) {
+            waker.sendMessage(SoloSlumber.getPlugin().getMessage(null, "woke_them_up"));
 
             // Tell everyone else what happened
             for (Player otherPlayer : waker.getWorld().getPlayers()) {
-                if (otherPlayer != waker && !wakers.contains(otherPlayer))
-                    otherPlayer.sendMessage(this.plugin.getMessage(waker, "woke_up"));
+                if (otherPlayer != waker && !sleepers.contains(otherPlayer))
+                    otherPlayer.sendMessage(SoloSlumber.getPlugin().getMessage(waker, "woke_up"));
             }
 
-            if (this.plugin.getConfig().getBoolean("wakerForcesNight"))
-                this.plugin.getNightForcers().put(waker.getWorld().getUID(), new NightForcer(waker));
+            if (SoloSlumber.getPlugin().getConfig().getBoolean("wakerForcesNight"))
+                SoloSlumber.getPlugin().addForcer(waker);
         }
     }
 
     @Override
     public void writeUsage(CommandSender player) {
         player.sendMessage(
-                ChatColor.GREEN + "/soloslumber wake" + ChatColor.YELLOW + "- Wake up sleeping players in this world.");
+                ChatColor.GREEN + "/soloslumber wake" + ChatColor.YELLOW + " - Wake up sleeping players in this world.");
     }
 }

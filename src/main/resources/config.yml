@@ -3,7 +3,7 @@ napTime: 100
 
 # Does waking up a sleeper revert to vanilla sleep? Set this to
 # `true` to allow anyone to veto single-player sleep for one
-# night cycle.
+# night cycle.  This setting also enables the wantnight command.
 # NOTE that feature depends on world time not going backwards.
 # Commands like built-in command `/time set day` resets world
 # time back to zero.  Consider Essentials `/day` instead.
@@ -23,5 +23,8 @@ messages:
   click_here: '  §9Click here to wake up the sleeper(s)'
   wake_them_up: 'Wake them up'
   woke_them_up: '§bYou just woke up the sleeper(s)'
-  skip_night_vetoed: '§b%player_name% has forced night.  Every player must sleep to skip night.'
+  skip_night_vetoed: '§b%player_name% has forced night.  Night forcers must sleep to skip night.'
   woke_up: '§b%player_name% woke up the sleeper(s)'
+  wants_night: '§b%player_name% is requesting night'
+  got_up: '§b%player_name% got out of bed'
+  night_requested: '§bYou have requested night.  You can sleep to cancel your request.'

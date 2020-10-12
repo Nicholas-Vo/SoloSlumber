@@ -3,12 +3,10 @@ package com.allocinit.bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public abstract class SubCommand<T extends CommandPlugin> {
-    protected T plugin;
+public abstract class SubCommand {
     private String cmd;
 
-    public SubCommand(T plugin, String cmd) {
-        this.plugin = plugin;
+    public SubCommand(String cmd) {
         this.cmd = cmd;
     }
 
